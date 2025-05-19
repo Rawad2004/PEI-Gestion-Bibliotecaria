@@ -6,9 +6,13 @@ package com.mycompany.views;
 
 import com.mycompany.pei.sbibliotecario.DAOusersImpl;
 import com.mycompany.interfaces.DAOUsers;
+import com.mycompany.utils.SendEmail;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.mail.PasswordAuthentication;
+import java.util.Properties;
+import javax.mail.Authenticator;
 import javax.swing.JTextField;
 
 /**
@@ -17,9 +21,6 @@ import javax.swing.JTextField;
  */
 public class UpUsers extends javax.swing.JPanel {
 
-    /**
-     * Creates new form Principal
-     */
     boolean isEdition = false;
     com.mycompany.models.Users userEdition;
 
@@ -326,6 +327,7 @@ public class UpUsers extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonActionPerformed
+
         String nombre = nameTxt.getText();
         String apP = apPTxt.getText();
         String apM = apMTxt.getText();
@@ -352,6 +354,41 @@ public class UpUsers extends javax.swing.JPanel {
 
             if (!isEdition) {
                 dao.registrar(user);
+
+                SendEmail enviarCorreo = new SendEmail();
+                String emailDestino = email; 
+                String nombreUsuario = nombre+" "+apP+" "+apM;
+
+                String asunto = "¡Bienvenido a Bookly - Tu registro fue exitoso!";
+
+                String contenidoHTML = "<!DOCTYPE html>"
+                        + "<html>"
+                        + "<head>"
+                        + "   <style>"
+                        + "       body { font-family: Arial, sans-serif; }"
+                        + "       .container { max-width: 600px; margin: auto; padding: 20px; }"
+                        + "       .header { background-color: #4285F4; color: white; padding: 10px; text-align: center; }"
+                        + "       .button { background-color: #4285F4; color: white; padding: 10px 20px; text-decoration: none; }"
+                        + "   </style>"
+                        + "</head>"
+                        + "<body>"
+                        + "   <div class='container'>"
+                        + "       <div class='header'>"
+                        + "           <h1>Bookly</h1>"
+                        + "       </div>"
+                        + "       <h2>¡Hola, " + nombreUsuario + "!</h2>"
+                        + "       <p>Tu registro en Bookly se completó exitosamente.</p>"
+                        + "       <p>Gracias por unirte a nuestra comunidad de lectores.</p>"
+                        + "   </div>"
+                        + "</body>"
+                        + "</html>";
+
+                try {
+                    enviarCorreo.enviarCorreo(emailDestino, asunto, contenidoHTML);
+                    System.out.println("Correo de registro enviado exitosamente");
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
             } else {
                 dao.modificar(user);
             }

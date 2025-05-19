@@ -211,6 +211,11 @@ public class Returns extends javax.swing.JPanel {
                 folioTxt.requestFocus();
                 return;
             }
+            
+            System.out.println("Email: " + currentUser.getEmail());
+            System.out.println("Nombre: " + currentUser.getName());
+            System.out.println("Apellido Paterno: " + currentUser.getLast_name_p());
+            System.out.println("Apellido Materno: " + currentUser.getLast_name_m());
 
             DAOBooks daoBooks = new DAOBooksImpl();
 

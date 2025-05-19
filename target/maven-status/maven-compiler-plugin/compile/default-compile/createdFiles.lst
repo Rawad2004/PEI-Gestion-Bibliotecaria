@@ -44,6 +44,8 @@ com\mycompany\pei\sbibliotecario\Dashboard.class
 com\mycompany\views\Books.class
 com\mycompany\components\MyButton$1.class
 com\mycompany\interfaces\DAOLendings.class
+com\mycompany\utils\SendEmail$1.class
+com\mycompany\utils\SendEmail.class
 com\mycompany\views\UpBooks.class
 com\mycompany\pei\sbibliotecario\Dashboard$2.class
 com\mycompany\views\UpBooks$2.class

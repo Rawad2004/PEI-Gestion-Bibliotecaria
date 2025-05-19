@@ -183,7 +183,7 @@ public class Lendings extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void BtnLendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnLendActionPerformed
-       String folio = folioTxt.getText();
+        String folio = folioTxt.getText();
         String bookId = libroIdTxt.getText();
 
         // Validaciones para los campos
@@ -203,7 +203,7 @@ public class Lendings extends javax.swing.JPanel {
 
         try {
             DAOUsers daoUsers = new DAOusersImpl();
-            
+
             // Validamos existencia del usuario
             com.mycompany.models.Users currentUser = daoUsers.getUserById(Integer.parseInt(folio));
             if (currentUser == null) {
@@ -211,25 +211,29 @@ public class Lendings extends javax.swing.JPanel {
                 folioTxt.requestFocus();
                 return;
             }
-            
+
+            System.out.println("Email: " + currentUser.getEmail());
+            System.out.println("Nombre: " + currentUser.getName());
+            System.out.println("Apellido Paterno: " + currentUser.getLast_name_p());
+            System.out.println("Apellido Materno: " + currentUser.getLast_name_m());
+
             DAOBooks daoBooks = new DAOBooksImpl();
-            
+
             // Validamos existencia del libro
             com.mycompany.models.Books currentBook = daoBooks.getBookById(Integer.parseInt(bookId));
-            if (currentBook == null){
+            if (currentBook == null) {
                 javax.swing.JOptionPane.showMessageDialog(this, "No se encontró ningún libro con ese ID. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
                 libroIdTxt.requestFocus();
                 return;
-            }
-            // Validamos disponibilidad del libro.
+            } // Validamos disponibilidad del libro.
             else if (currentBook.getAvailable() < 1) {
                 javax.swing.JOptionPane.showMessageDialog(this, "Ya no hay más libros disponibles con esa ID para prestar. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
                 libroIdTxt.requestFocus();
                 return;
             }
-            
+
             DAOLendings daoLendings = new DAOLendingsImpl();
-            
+
             // Validamos que el usuario no tenga ya ese libro prestado.
             com.mycompany.models.Lendings currentLending = daoLendings.getLending(currentUser, currentBook);
             if (currentLending != null) {
@@ -244,11 +248,13 @@ public class Lendings extends javax.swing.JPanel {
             lending.setUser_id(currentUser.getId());
             lending.setDate_out(Utils.getFechaActual());
             daoLendings.registrar(lending);
-            
+
+           
+
             // Modificamos el libro restandole 1 en disponibilidad.
             currentBook.setAvailable(currentBook.getAvailable() - 1);
             daoBooks.modificar(currentBook);
-            
+
             javax.swing.JOptionPane.showMessageDialog(this, "Libro ID: " + currentBook.getId() + " prestado exitosamente a " + currentUser.getName() + ".\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);
             folioTxt.setText("");
             libroIdTxt.setText("");
