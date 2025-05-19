@@ -23,8 +23,8 @@ import javax.swing.JTextField;
  */
 public class Returns extends javax.swing.JPanel {
 
-    private final int MAX_DAYS_RETURN = 5;
-    private final int COST_DAY_SANC = 10;
+    private final int MAX_DAYS_RETURN = 15;
+    private final int COST_DAY_SANC = 1000;
     
     public Returns() {
         initComponents();
