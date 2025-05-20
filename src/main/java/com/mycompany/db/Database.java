@@ -1,7 +1,88 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+package com.mycompany.db;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Database {
+    protected Connection conexion;
+    private static HikariDataSource dataSource;
+
+    static {
+        try {
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl("jdbc:mysql://turntable.proxy.rlwy.net:42923/ppi"
+                + "?useSSL=false"
+                + "&serverTimezone=UTC"
+                + "&allowPublicKeyRetrieval=true");
+            config.setUsername("root");
+            config.setPassword("VqZnfVhDrwiMsXjJvvUGJhKqwvFjZlbq");
+            
+            // Configuración optimizada
+            config.setMaximumPoolSize(10);
+            config.setConnectionTimeout(30000); // 30 segundos
+            config.setIdleTimeout(600000); // 10 minutos
+            
+            dataSource = new HikariDataSource(config);
+            
+        } catch (Exception e) {
+            Logger.getLogger(Database.class.getName()).log(Level.SEVERE, "Error al inicializar pool", e);
+        }
+    }
+
+    // Métodos originales compatibles con tus DAOs
+    public void Conectar() throws ClassNotFoundException, SQLException {
+        if (conexion == null || conexion.isClosed()) {
+            conexion = dataSource.getConnection();
+        }
+    }
+
+    public void Cerrar() throws SQLException {
+        if (conexion != null && !conexion.isClosed()) {
+            conexion.close(); // Devuelve la conexión al pool
+        }
+    }
+
+    // Método para cerrar el pool al salir
+    public static void cerrarPool() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+        }
+    }
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package com.mycompany.db;
 
 import java.sql.Connection;
@@ -9,26 +90,38 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
-/**
- *
- * @author Rawad
- */
 public class Database {
+
+    private static HikariDataSource dataSource;
+
+    static {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:mysql://turntable.proxy.rlwy.net:42923/ppi");
+        config.setUsername("root");
+        config.setPassword("VqZnfVhDrwiMsXjJvvUGJhKqwvFjZlbq");
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        dataSource = new HikariDataSource(config);
+    }
 
     protected Connection conexion;
 
-    private final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    private final String DB_URL = "jdbc:mysql://localhost/ppi";
+    private final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private final String DB_URL = "jdbc:mysql://turntable.proxy.rlwy.net:42923/ppi";
 
     private final String USER = "root";
-    private final String PASS = "root";
+    private final String PASS = "VqZnfVhDrwiMsXjJvvUGJhKqwvFjZlbq";
 
     public void Conectar() throws ClassNotFoundException {
         try {
-            System.out.println("Conectando");
-            conexion = DriverManager.getConnection(DB_URL, USER, PASS);
+
             Class.forName(JDBC_DRIVER);
+            System.out.println("Conectando");
+            conexion = DriverManager.getConnection(DB_URL + "?useSSL=false&serverTimezone=UTC", USER, PASS);
         } catch (SQLException ex) {
             System.out.println("No se pudo conectar");
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, null, ex);
@@ -36,7 +129,7 @@ public class Database {
 
     }
 
-    public void Cerrar() throws SQLException{
+    public void Cerrar() throws SQLException {
         if (conexion != null) {
             if (conexion.isClosed()) {
                 conexion.close();
@@ -44,3 +137,4 @@ public class Database {
         }
     }
 }
+

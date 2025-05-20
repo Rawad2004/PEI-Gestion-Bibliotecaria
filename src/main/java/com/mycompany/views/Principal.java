@@ -333,8 +333,5 @@ public class Principal extends javax.swing.JPanel {
     private com.mycompany.components.PanelRound panelRound2;
     // End of variables declaration//GEN-END:variables
 
-    @Override
-    public String toString() {
-        return "Principal"; // o cualquier texto que tenga sentido
-    }
+   
 }

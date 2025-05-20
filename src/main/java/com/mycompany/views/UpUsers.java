@@ -351,13 +351,12 @@ public class UpUsers extends javax.swing.JPanel {
 
         try {
             DAOUsers dao = new DAOusersImpl();
+            SendEmail enviarCorreo = new SendEmail();
+            String emailDestino = email;
+            String nombreUsuario = nombre + " " + apP + " " + apM;
 
             if (!isEdition) {
                 dao.registrar(user);
-
-                SendEmail enviarCorreo = new SendEmail();
-                String emailDestino = email; 
-                String nombreUsuario = nombre+" "+apP+" "+apM;
 
                 String asunto = "¡Bienvenido a Bookly - Tu registro fue exitoso!";
 
@@ -389,8 +388,103 @@ public class UpUsers extends javax.swing.JPanel {
                 } catch (Exception e) {
                     System.out.println(e);
                 }
-            } else {
+            } else if (isEdition) {
                 dao.modificar(user);
+
+                String asunto = "✅ Actualización de perfil exitosa - Bookly";
+
+                String contenidoHTML = String.format("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
+                .header { background-color: #4285F4; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header h1 { color: white; margin: 0; }
+                .content { padding: 20px; }
+                .user-data { 
+                    background: #f9f9f9; 
+                    padding: 15px; 
+                    border-left: 4px solid #4285F4;
+                    margin: 20px 0;
+                }
+                .data-row { margin-bottom: 10px; }
+                .data-label { font-weight: bold; display: inline-block; width: 120px; }
+                .button { 
+                    display: inline-block;
+                    background-color: #4285F4;
+                    color: white !important;
+                    padding: 12px 24px;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    margin-top: 15px;
+                }
+                .footer { 
+                    margin-top: 20px; 
+                    padding-top: 20px; 
+                    border-top: 1px solid #e0e0e0; 
+                    font-size: 12px; 
+                    color: #777; 
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Bookly</h1>
+                </div>
+                <div class="content">
+                    <h2>¡Actualización exitosa!</h2>
+                    <p>Se han actualizado correctamente tus datos en nuestro sistema:</p>
+                    
+                    <div class="user-data">
+                        <div class="data-row">
+                            <span class="data-label">Nombre completo:</span>
+                            %s %s %s
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Email:</span>
+                            %s
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Domicilio:</span>
+                            %s
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Teléfono:</span>
+                            %s
+                        </div>
+                    </div>
+                    
+                    <p>Si no realizaste estos cambios, por favor contacta inmediatamente a nuestro soporte.</p>
+                    
+                 
+                </div>
+                <div class="footer">
+                    <p>© %d Bookly - Sistema de Gestión de Bibliotecas</p>
+                    <p>Este es un correo automático, por favor no lo respondas directamente.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """,
+                        user.getName(),
+                        user.getLast_name_p(),
+                        user.getLast_name_m(),
+                        user.getEmail(),
+                        user.getDomicilio(),
+                        user.getTel(),
+                        java.time.Year.now().getValue());
+
+                try {
+                    enviarCorreo.enviarCorreo(emailDestino, asunto, contenidoHTML);
+                    System.out.println("Correo de registro enviado exitosamente");
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
             }
 
             String successMsg = isEdition ? "modificado" : "registrado";

@@ -7,6 +7,7 @@ package com.mycompany.views;
 import com.mycompany.interfaces.DAOUsers;
 import com.mycompany.pei.sbibliotecario.DAOusersImpl;
 import com.mycompany.pei.sbibliotecario.Dashboard;
+import com.mycompany.utils.SendEmail;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -48,6 +49,7 @@ public class Users extends javax.swing.JPanel {
         try {
             DAOUsers dao = new DAOusersImpl();
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setRowCount(0);
             dao.listar("").forEach((u) -> model.addRow(new Object[]{u.getId(), u.getName(), u.getLast_name_p(), u.getLast_name_m(), u.getDomicilio(), u.getTel(), u.getEmail()}));
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -103,7 +105,7 @@ public class Users extends javax.swing.JPanel {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, true, true, true, true, true, true
+                false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -114,6 +116,9 @@ public class Users extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
+        jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jTable1.setRowHeight(30);
+        jTable1.setSelectionBackground(new java.awt.Color(51, 51, 51));
         jTable1.getTableHeader().setReorderingAllowed(false);
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
@@ -239,15 +244,15 @@ public class Users extends javax.swing.JPanel {
 
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
         try {
-            
-            if(userSearch.getText().isEmpty()){
-            javax.swing.JOptionPane.showMessageDialog(this, "Debes ingresar el nombre del usuario a buscar.\n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
+
+            if (userSearch.getText().isEmpty()) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Debes ingresar el nombre del usuario a buscar.\n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
             }
-                    
+
             DAOUsers dao = new DAOusersImpl();
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0);
-            dao.listar(userSearch.getText()).forEach((u) -> model.addRow(new Object[]{u.getId(), u.getName(), u.getLast_name_p(), u.getLast_name_m(), u.getDomicilio(), u.getTel(),u.getEmail()}));
+            dao.listar(userSearch.getText()).forEach((u) -> model.addRow(new Object[]{u.getId(), u.getName(), u.getLast_name_p(), u.getLast_name_m(), u.getDomicilio(), u.getTel(), u.getEmail()}));
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -258,16 +263,107 @@ public class Users extends javax.swing.JPanel {
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+
         DAOUsers dao = new DAOusersImpl();
-        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
 
         if (jTable1.getSelectedRows().length < 1) {
             javax.swing.JOptionPane.showMessageDialog(this, "Debes seleccionar uno o más usuarios a eliminar.\n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
         } else {
             for (int i : jTable1.getSelectedRows()) {
                 try {
-                    dao.eliminar((int) jTable1.getValueAt(i, 0));
-                    model.removeRow(i);
+
+                    com.mycompany.models.Users currentUser = dao.getUserById((int) jTable1.getValueAt(i, 0));
+
+                    int respuesta = javax.swing.JOptionPane.showConfirmDialog(
+                            this,
+                            "<html><body><p style='width: 200px;'>¿Estás seguro de eliminar permanentemente al usuario seleccionado?<br><b>Esta acción no puede revertirse.</b></p></body></html>",
+                            "Confirmar eliminación",
+                            javax.swing.JOptionPane.YES_NO_OPTION,
+                            javax.swing.JOptionPane.WARNING_MESSAGE
+                    );
+
+                    if (respuesta == javax.swing.JOptionPane.YES_OPTION) {
+                        SendEmail enviarCorreo = new SendEmail();
+                        String name = currentUser.getName();
+                        String lnameP = currentUser.getLast_name_p();
+                        String lnameM = currentUser.getLast_name_m();
+                        String email = currentUser.getEmail();
+                        String nombreUsuario = name + " " + lnameP + " " + lnameM;
+                        dao.eliminar((int) jTable1.getValueAt(i, 0));
+                        LoadUsers();
+                        System.out.println("ID A ELEMININAR=" + (int) jTable1.getValueAt(i, 0));
+                        String asunto = "Tu cuenta en Bookly ha sido eliminada";
+
+                        String contenidoHTML = String.format("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
+                .header { background-color: #E53935; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header h1 { color: white; margin: 0; }
+                .content { padding: 20px; }
+                .highlight-box { 
+                    background: #FFEBEE; 
+                    padding: 15px; 
+                    border-left: 4px solid #E53935;
+                    margin: 20px 0;
+                }
+                .footer { 
+                    margin-top: 20px; 
+                    padding-top: 20px; 
+                    border-top: 1px solid #e0e0e0; 
+                    font-size: 12px; 
+                    color: #777; 
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Bookly</h1>
+                </div>
+                <div class="content">
+                    <h2>Hola, %s</h2>
+                    
+                    <div class="highlight-box">
+                        <h3 style="margin-top: 0; color: #E53935;">Tu cuenta ha sido eliminada</h3>
+                        <p>Todos tus datos personales han sido eliminados permanentemente de nuestro sistema.</p>
+                    </div>
+                    
+                    <p><strong>Detalles importantes:</strong></p>
+                    <ul>
+                        <li>Ya no podrás acceder al sistema con estas credenciales</li>
+                        <li>Tus préstamos activos han sido cancelados</li>
+                        <li>No recibirás más comunicaciones de nuestra parte</li>
+                    </ul>
+                    
+                    <p>Si esto fue un error o necesitas ayuda, contáctanos respondiendo a este correo.</p>
+                    
+                    <p>Gracias por haber sido parte de nuestra comunidad de lectores.</p>
+                </div>
+                <div class="footer">
+                    <p>© %d Bookly - Sistema de Gestión de Bibliotecas</p>
+                    <p>Este es un correo automático, por favor no lo respondas directamente.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """,
+                                nombreUsuario,
+                                java.time.Year.now().getValue());
+
+                        try {
+                            enviarCorreo.enviarCorreo(email, asunto, contenidoHTML);
+                            System.out.println("Correo de registro enviado exitosamente");
+                        } catch (Exception e) {
+                            System.out.println(e);
+                        }
+
+                    }
+
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }

@@ -97,6 +97,7 @@ public class Dashboard extends javax.swing.JFrame {
         lblPageTitle = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMaximumSize(new java.awt.Dimension(1020, 698));
         setMinimumSize(new java.awt.Dimension(1020, 680));
 
         Background.setBackground(new java.awt.Color(241, 241, 241));

@@ -10,11 +10,15 @@ import com.mycompany.interfaces.DAOUsers;
 import com.mycompany.pei.sbibliotecario.DAOBooksImpl;
 import com.mycompany.pei.sbibliotecario.DAOLendingsImpl;
 import com.mycompany.pei.sbibliotecario.DAOusersImpl;
+import com.mycompany.utils.SendEmail;
 import com.mycompany.utils.Utils;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import javax.swing.JTextField;
 
 /**
@@ -25,7 +29,7 @@ public class Returns extends javax.swing.JPanel {
 
     private final int MAX_DAYS_RETURN = 15;
     private final int COST_DAY_SANC = 1000;
-    
+
     public Returns() {
         initComponents();
         InitStyles();
@@ -211,7 +215,7 @@ public class Returns extends javax.swing.JPanel {
                 folioTxt.requestFocus();
                 return;
             }
-            
+
             System.out.println("Email: " + currentUser.getEmail());
             System.out.println("Nombre: " + currentUser.getName());
             System.out.println("Apellido Paterno: " + currentUser.getLast_name_p());
@@ -245,9 +249,86 @@ public class Returns extends javax.swing.JPanel {
             currentBook.setAvailable(currentBook.getAvailable() + 1);
             daoBooks.modificar(currentBook);
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Libro ID: " + currentBook.getId() + " devuelto exitosamente por " + currentUser.getName() + ".\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);
             folioTxt.setText("");
             libroIdTxt.setText("");
+            javax.swing.JOptionPane.showMessageDialog(this, "Libro ID: " + currentBook.getId() + " devuelto exitosamente por " + currentUser.getName() + ".\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+            try {
+
+                SendEmail enviarCorreo = new SendEmail();
+                String emailDestino = currentUser.getEmail();
+                String nombreUsuario = currentUser.getName() + " " + currentUser.getLast_name_p() + " " + currentUser.getLast_name_p();
+                int idLibro = currentBook.getId();
+                String nameLibro = currentBook.getTitle();
+
+                String asunto = String.format("📚 Devolucion Registrada - %s (ID: %d)", nameLibro, idLibro);
+
+                String contenidoHTML = String.format("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; }
+                .header { background-color: #4285F4; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header h1 { color: white; margin: 0; }
+                .content { padding: 20px; }
+                .book-info { background: #f9f9f9; padding: 15px; border-left: 4px solid #4285F4; margin: 20px 0; }
+                .button { 
+                    display: inline-block;
+                    background-color: #4285F4;
+                    color: white !important;
+                    padding: 12px 24px;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    font-weight: bold;
+                }
+                .footer { 
+                    margin-top: 20px; 
+                    padding-top: 20px; 
+                    border-top: 1px solid #e0e0e0; 
+                    font-size: 12px; 
+                    color: #777; 
+                }
+                .deadline { color: #d32f2f; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Bookly - Devolucion Registrada</h1>
+                </div>
+                <div class="content">
+                    <h2>¡Hola, %s!</h2>
+                    <p>Has realizado una devolucion en nuestro sistema. Aquí los detalles:</p>
+                    
+                    <div class="book-info">
+                        <h3>%s</h3>
+                        <p><strong>ID del libro:</strong> %d</p>
+                    </div>
+                    
+                    
+                    <p>Si no prestaste el libro, por favor ignora este mensaje.</p>
+                </div>
+                <div class="footer">
+                    <p>© %d Bookly - Sistema de Gestión de Bibliotecas</p>
+                    <p>Este es un correo automático, por favor no lo respondas directamente.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """,
+                        nombreUsuario,
+                        nameLibro,
+                        idLibro,
+                        java.time.Year.now().getValue());
+
+                enviarCorreo.enviarCorreo(emailDestino, asunto, contenidoHTML);
+                System.out.println("Correo de registro enviado exitosamente");
+            } catch (Exception e) {
+                System.out.println(e);
+            }
 
             // Verificamos sanciones
             int days = Utils.diferenciasDeFechas(Utils.stringToDate(currentLending.getDate_out()), new Date());
