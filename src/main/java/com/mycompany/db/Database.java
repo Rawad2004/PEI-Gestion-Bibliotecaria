@@ -1,4 +1,4 @@
-/*
+
 package com.mycompany.db;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -12,7 +12,8 @@ public class Database {
     protected Connection conexion;
     private static HikariDataSource dataSource;
 
-    static {
+    // Método para inicializar el pool (llamado desde main)
+    public static void inicializarPool() {
         try {
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl("jdbc:mysql://turntable.proxy.rlwy.net:42923/ppi"
@@ -22,19 +23,18 @@ public class Database {
             config.setUsername("root");
             config.setPassword("VqZnfVhDrwiMsXjJvvUGJhKqwvFjZlbq");
             
-            // Configuración optimizada
             config.setMaximumPoolSize(10);
-            config.setConnectionTimeout(30000); // 30 segundos
-            config.setIdleTimeout(600000); // 10 minutos
+            config.setConnectionTimeout(30000);
             
             dataSource = new HikariDataSource(config);
+            Logger.getLogger(Database.class.getName()).log(Level.INFO, "Pool de conexiones inicializado");
             
         } catch (Exception e) {
             Logger.getLogger(Database.class.getName()).log(Level.SEVERE, "Error al inicializar pool", e);
         }
     }
 
-    // Métodos originales compatibles con tus DAOs
+    // Métodos originales que usan tus DAOs
     public void Conectar() throws ClassNotFoundException, SQLException {
         if (conexion == null || conexion.isClosed()) {
             conexion = dataSource.getConnection();
@@ -43,18 +43,18 @@ public class Database {
 
     public void Cerrar() throws SQLException {
         if (conexion != null && !conexion.isClosed()) {
-            conexion.close(); // Devuelve la conexión al pool
+            conexion.close(); // La conexión vuelve al pool
         }
     }
 
-    // Método para cerrar el pool al salir
+    // Método para cerrar el pool
     public static void cerrarPool() {
         if (dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
+            Logger.getLogger(Database.class.getName()).log(Level.INFO, "Pool de conexiones cerrado");
         }
     }
 }
-*/
 
 
 
@@ -83,6 +83,7 @@ public class Database {
 
 
 
+/*
 package com.mycompany.db;
 
 import java.sql.Connection;
@@ -138,3 +139,4 @@ public class Database {
     }
 }
 
+*/

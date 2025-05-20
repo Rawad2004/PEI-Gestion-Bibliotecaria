@@ -1,5 +1,6 @@
 com\mycompany\models\Lendings.class
 com\mycompany\utils\Utils.class
+com\mycompany\pei\sbibliotecario\Dashboard$8.class
 com\mycompany\pei\sbibliotecario\Dashboard$1.class
 com\mycompany\views\Reports.class
 com\mycompany\views\Books$2.class

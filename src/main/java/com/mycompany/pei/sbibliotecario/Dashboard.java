@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterIJTheme;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.mycompany.components.ButtonGroupManager;
+import com.mycompany.db.Database;
 import com.mycompany.views.Books;
 import com.mycompany.views.Lendings;
 import com.mycompany.views.Principal;
@@ -34,6 +35,12 @@ public class Dashboard extends javax.swing.JFrame {
 
     public Dashboard() throws Exception {
         initComponents();
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                Database.cerrarPool();
+            }
+        });
         InitStyles();
         setupButtonGroup();
         SetDate();
@@ -48,7 +55,7 @@ public class Dashboard extends javax.swing.JFrame {
     public static void ShowJPanel(JPanel p) {
         p.setSize(774, 612);
         p.setLocation(0, 0);
-        
+
         Print.removeAll();
         Print.add(p, BorderLayout.CENTER);
         Print.revalidate();
@@ -99,6 +106,7 @@ public class Dashboard extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(1020, 698));
         setMinimumSize(new java.awt.Dimension(1020, 680));
+        setResizable(false);
 
         Background.setBackground(new java.awt.Color(241, 241, 241));
         Background.setMinimumSize(new java.awt.Dimension(1020, 698));
@@ -285,7 +293,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_btn_booksActionPerformed
 
     private void btn_returnsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_returnsActionPerformed
-        ShowJPanel(new Returns());        
+        ShowJPanel(new Returns());
     }//GEN-LAST:event_btn_returnsActionPerformed
 
     private void btn_prinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_prinActionPerformed
@@ -308,18 +316,25 @@ public class Dashboard extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        Database.inicializarPool();
 
-        FlatMacLightLaf.setup();
+        try {
+            FlatMacLightLaf.setup();
 
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    new Dashboard().setVisible(true);
-                } catch (Exception ex) {
-                    Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    try {
+                        new Dashboard().setVisible(true);
+                    } catch (Exception ex) {
+                        Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
-            }
-        });
+            });
+        } catch (Exception e) {
+            Logger.getLogger(Dashboard.class.getName()).log(Level.SEVERE, "Error al iniciar", e);
+            Database.cerrarPool();
+        }
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
